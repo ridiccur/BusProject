@@ -1,0 +1,20 @@
+spring:
+    profiles:
+        active: dev
+    application:
+        name: BusProject
+        version: 1.0.0
+---
+spring:
+    config:
+        activate:
+            on-profile: dev
+server:
+    port: 8080
+---
+spring:
+    config:
+        activate:
+            on-profile: prod
+server:
+    port: 9001

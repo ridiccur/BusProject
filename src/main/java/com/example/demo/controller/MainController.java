@@ -12,21 +12,24 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.Product;
+import com.example.demo.service.ProductService;
+
+import jakarta.validation.Valid;
 
 @RestController
 public class MainController {
-    
+    private ProductService productService;
+    public MainController(ProductService productService) {
+        this.productService = productService;
+    }
     @GetMapping("/products")
     private List<Product> getProducts(){
-        return products;
+        return productService.getAll();
     }
-    private List<Product> products = new ArrayList<>(
-        Arrays.asList(new Product(1l,"aboba",120), new Product(2l,"boba",130))
-    );
     @PostMapping("/products")
-    private ResponseEntity<Product> addProduct(@RequestBody Product product) {
+    private ResponseEntity<Product> addProduct(@RequestBody @Valid Product product) {
         product.setId(3l);
-        products.add(product);
+        productService.create(product);
         return ResponseEntity.status(HttpStatus.CREATED).body(product);
     }
 }
