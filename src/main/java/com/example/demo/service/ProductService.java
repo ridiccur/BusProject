@@ -1,47 +1,54 @@
 package com.example.demo.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.PostConstruct;
 import com.example.demo.model.Product;
 import com.example.demo.repository.ProductRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
-
 @Service
 public class ProductService {
-    public List<Product> getAll() {
-        return productRepository.findAll();
-    }
     private final ProductRepository productRepository;
+
     public ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
+
+    public List<Product> getAll() {
+        return productRepository.findAll();
+    }
+
     public Product getById(Long id) {
         return productRepository.findById(id).orElse(null);
     }
-    public Product update(Long id, Product updated) {
+
+    public Product create(Product product) {
+        return productRepository.save(product);
+    }
+
+    public Product updateById(Long id, Product updatedProduct) {
         return productRepository.findById(id)
-                .map(p -> {
-                    p.setTitle(updated.getTitle());
-                    p.setCost(updated.getCost());
-                    return productRepository.save(p);
+                .map(product -> {
+                    product.setTitle(updatedProduct.getTitle());
+                    product.setCost(updatedProduct.getCost());
+                    return productRepository.save(product);
                 })
                 .orElse(null);
     }
-    public boolean delete(Long id) {
+
+    public boolean deleteById(Long id) {
         if (productRepository.existsById(id)) {
             productRepository.deleteById(id);
             return true;
         }
         return false;
     }
-    public List<Product> getByTitle (String title) {
+
+    public List<Product> getByTitle(String title) {
         if (title != null) {
             return productRepository.findByTitleContainingIgnoreCase(title);
         }
         return productRepository.findAll();
-    } 
+    }
 }

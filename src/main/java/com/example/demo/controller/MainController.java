@@ -1,7 +1,5 @@
 package com.example.demo.controller;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -12,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.Product;
@@ -21,14 +20,20 @@ import jakarta.validation.Valid;
 
 @RestController
 public class MainController {
-    private ProductService productService;
+    private final ProductService productService;
+
     public MainController(ProductService productService) {
         this.productService = productService;
     }
+
     @GetMapping("/products")
-    private List<Product> getProducts(){
+    public List<Product> getProducts(@RequestParam(required = false) String title) {
+        if (title != null) {
+            return productService.getByTitle(title);
+        }
         return productService.getAll();
     }
+
     @GetMapping("/products/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable Long id) {
         Product product = productService.getById(id);
@@ -38,23 +43,25 @@ public class MainController {
             return ResponseEntity.notFound().build();
         }
     }
+
     @PostMapping("/products")
-    private ResponseEntity<Product> addProduct(@RequestBody @Valid Product product) {
-        product.setId(3l);
-        productService.create(product);
-        return ResponseEntity.status(HttpStatus.CREATED).body(product);
+    public ResponseEntity<Product> addProduct(@RequestBody @Valid Product product) {
+        Product createdProduct = productService.create(product);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
     }
+
     @PutMapping("/products/{id}")
-    public ResponseEntity<Product> edit(@PathVariable Long id, @RequestBody @Valid Product product) {
-        Product product = productService.updateById(id);
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody @Valid Product updatedProduct) {
+        Product product = productService.updateById(id, updatedProduct);
         if (product != null) {
             return ResponseEntity.ok(product);
         } else {
             return ResponseEntity.notFound().build();
         }
     }
+
     @DeleteMapping("/products/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         if (productService.deleteById(id)) {
             return ResponseEntity.noContent().build();
         } else {
